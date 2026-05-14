@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          fetch-depth: 1
+      
+      - name: Fetch LFS files
+        run: git lfs pull --include="videos/**"
+
+      - name: Prepare files
+        run: |
+          mkdir www
+          mkdir www/videos/
+          mkdir www/videos/2018
+          cp videos/2018/thesis_flavio.mp4 www/videos/2018/
+          touch www/.nojekyll
+      
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./www
+          publish_branch: gh-pages
